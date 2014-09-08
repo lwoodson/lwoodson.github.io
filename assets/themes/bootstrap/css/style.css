@@ -63,3 +63,31 @@
   background: #57A957;
   border: 1px solid #4c964d;
   color: #FFF; }
+
+.stickit {
+  position: fixed;
+  top: 0;
+  z-index: 10000; }
+
+#profile {
+  line-height: 1.3;
+}
+
+#profile img {
+  width: 222px;
+}
+
+#profile h2 {
+  letter-spacing: -1px;
+  margin-bottom: 0px;
+}
+#profile h4 {
+  word-spacing: 15px;
+  margin-top: 0px;
+}
+#profile a {
+  float: right;
+}
+#profile i {
+  margin-right: 10px;
+}
