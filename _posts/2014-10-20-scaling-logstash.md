@@ -1,6 +1,6 @@
 ---
 layout: post
-category: software
+category: devops
 tagline: "Scaling Logstash"
 tags : [logtash, logging, elasticsearch]
 ---
