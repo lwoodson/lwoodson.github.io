@@ -115,6 +115,12 @@ body {
   background-color: #428bca;
   color: #fdfdfd;
 }
+.panel-default > .panel-heading > h3 > a {
+  color: #fdfdfd;
+}
+.panel-default > .panel-heading > h3 > a:hover {
+  text-decoration: none;
+}
 .panel-body {
   padding: 30px;
   letter-spacing: 0.3px;
