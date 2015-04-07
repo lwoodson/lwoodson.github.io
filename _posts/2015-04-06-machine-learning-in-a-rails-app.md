@@ -13,13 +13,17 @@ that were made from them.  Given that data, couldn't we use machine learning to
 infer what actions a customer would taken when confronted with an order in our
 UI?
 
-{% youtube b49OJZlMEgo 800 %}
-
 The answer was yes.  We developed a system dubbed AutoShip that allows us to predict
-customer's shipping choices with great accuracy.  Getting there was not so easy,
-however.  Our application is written in Ruby on Rails.  While our team is
-full of great software engineers and web development gurus, none of us were
-data scientists by trade.  Here are 3 lessons learned learned or relearned on the
+customer's shipping choices with great accuracy.  We even made a snazzy marketing
+video with really soothing music!
+
+<iframe width="560" height="315" src="http://www.youtube.com/embed/b49OJZlMEgo" frameborder="0" allowfullscreen>
+</iframe>
+
+Getting there was not so easy, however.  Our application is written in Ruby on
+Rails.  While our team is full of great software engineers and web development
+gurus, none of us were data scientists by trade.  Here are 3 lessons 
+learned or relearned on the
 journey to bringing machine learning to our product.
 
 ### 1. Build on the Shoulders of Giants

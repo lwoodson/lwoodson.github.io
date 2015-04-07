@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Dev Quiote - Charging digital windmills since, oh, forever
+title: Dev Quixote - Charging digital windmills since, oh, forever
 tagline: Supporting tagline
 ---
 {% include JB/setup %}
