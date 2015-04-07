@@ -10,7 +10,7 @@ cost.  To make life even easier on our customers, we wanted to automate the proc
 of decision making when purchasing a label.  After all, we had a large example set
 of data for them -- the orders we've received and the various shipping choices
 that were made from them.  Given that data, couldn't we use machine learning to
-infer what actions a customer would taken when confronted with an order in our
+infer what actions a customer would take when confronted with an order in our
 UI?
 
 The answer was yes.  We developed a system dubbed AutoShip that allows us to predict
@@ -24,25 +24,24 @@ Getting there was not so easy, however.  Our application is written in Ruby on
 Rails.  While our team is full of great software engineers and web development
 gurus, none of us were data scientists by trade.  Here are 3 lessons 
 learned or relearned on the
-journey to bringing machine learning to our product.
+journey to bring machine learning to our product.
 
-### 1. Build on the Shoulders of Giants
+### 1. Stand on the Shoulders of Giants
 Ever hear that truism?  Well, it was hammered home on this project.  I love [Ruby](https://www.ruby-lang.org/en/) as
 a language and feel [Rails](http://rubyonrails.org/) is a pretty good framework for building web applications.
-But its not exactly a paragon for scientific or statistical computing.  Looking
-for a machine learning lib in Ruby?  Good luck.  There are languages where machine
-learning libraries are much more mature and active.  R, Python, Scala are examples
-of languages with machine learning libraries that far outclass anything Ruby has to
-offer.  So we spiked a proof of concept using [Python](https://www.python.org/) and [SciKit Learn](http://scikit-learn.org/stable/) which got us off the
-ground and moving towards a final solution.
+But they are not exactly paragons for scientific or statistical computing.  Looking
+for a machine learning lib in Ruby?  Good luck.  There are libraries in other
+languages that are strong in this area of computer science, however.  [Python's](https://www.python.org/)
+[SciKit Learn](http://scikit-learn.org/stable/) library is one example that far
+outclasses anything found in Ruby.  So we spiked a proof of concept using it and
+were up and running towards a final solution.
 
-The moral here is you really should use the best tool for the job.  We could have
-tried to fake-it-till-we-made-it as data scientists, or we could use the tools
-written by those who *are*.
+The moral here is you really should use the best tool for the job.  Ruby is a
+square peg to the round hole of machine learning.
 
 ### 2. Play To Your Strengths
-We had spiked a workable solution, now we needed to bring it to the product.  Should
-we port to Ruby?  Should I stick with Python, the one that had brought us this far?
+We had a workable solution, now we needed to bring it to the product.  Should
+we port to Ruby?  Should we stick with Python, the one that had brought us this far?
 We decided on the latter, implementing it as a small microservice web application
 using [Flask](http://flask.pocoo.org/).
 
@@ -67,7 +66,7 @@ data science uber geek.
 We use [Postgres](http://www.postgresql.org/) as our main database.  All of our order and shipment data lived
 there.  At first glance, it would seem like we should just use the data as found
 in the relational database to back the system.  But for a number of reasons,
-We decided to use [Elasticsearch](https://www.elastic.co/) as the repository for the data that our system
+we decided to use [Elasticsearch](https://www.elastic.co/) as the repository for the data that our system
 would use.
 
 First, it stores unstructured documents.  We weren't exactly sure what data we
@@ -82,12 +81,12 @@ get large sets of order/shipment/prediction data used to train a machine learnin
 algorithm.  And being elastically scalable would mean Elasicsearch could grow
 as much as we needed it to.
 
-Lastly, it has [Kibana](https://www.elastic.co/products/kibana), an amazing data visualiztaion tool.  I had already set up
+Lastly, it has [Kibana](https://www.elastic.co/products/kibana), an amazing data visualization tool.  I had already set up
 an Elasticsearch/Logstash/Kibana stack as outlined in a [previous post](http://devquixote.com/devops/2014/10/20/scaling-logstash/).  Pointing
 it at our order, shipment and prediction data has allowed us to have a tremendous
 ability to delve into our data.  Without writing any code, we could easily visualize
 the answers to questions like "For customer A, what were the packaging choices that
-were made for the innacurate predictions made by our service?"  It was invaluable
+were made by our prediction service for the predictions that proved inaccurate?"  It was invaluable
 during the exploratory phase, and is perhaps even more so as the feature is moving
 into support-mode post-rollout.
 
