@@ -1,8 +1,9 @@
----
-# Remember to set production_url in your _config.yml file!
-title : Sitemap
----
-{% for page in site.pages %}
-{{site.production_url}}{{ page.url }}{% endfor %}
-{% for post in site.posts %}
-{{site.production_url}}{{ post.url }}{% endfor %}
+
+http://username.github.io/atom.xml
+http://username.github.io/index.html
+http://username.github.io/rss.xml
+http://username.github.io/sitemap.txt
+
+http://username.github.io/data/2015/04/06/machine-learning-in-a-rails-app
+http://username.github.io/devops/2014/10/20/scaling-logstash
+http://username.github.io/software/2014/09/06/benchmarking-pdf-generation-in-ruby

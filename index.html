@@ -1,0 +1,506 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Dev Quiote - Charging digital windmills since, oh, forever</title>
+    
+    <meta name="author" content="Name Lastname">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Nunito:300,400' rel='stylesheet' type='text/css'>
+    <link href="/assets/themes/bootstrap/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/bootstrap/css/style.css" rel="stylesheet">
+  
+    <!--[if lt IE 9]>
+      <script src="/assets/themes/bootstrap/resources/respond/Respond.min.js"></script>
+    <![endif]-->
+
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+    <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="/assets/themes/bootstrap/js/site.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">DEVQUIXOTE</a>
+        </div>
+
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h3>
+          <a href="/data/2015/04/06/machine-learning-in-a-rails-app">
+            Machine Learning In A Rails App
+          </a>
+      </h3>
+    </div>
+    <div class="panel-body"><p>At <a href="http://shippingeasy.com/">ShippingEasy</a>, we take customer’s orders from various online storefronts and allow
+the customer to easily generate shipping labels to fulfill those orders at a reduced
+cost.  To make life even easier on our customers, we wanted to automate the process
+of decision making when purchasing a label.  After all, we had a large example set
+of data for them – the orders we’ve received and the various shipping choices
+that were made from them.  Given that data, couldn’t we use machine learning to
+infer what actions a customer would taken when confronted with an order in our
+UI?</p>
+
+<iframe width="560" height="420" src="http://www.youtube.com/embed/b49OJZlMEgo?color=white&amp;theme=light"></iframe>
+
+<p>The answer was yes.  We developed a system dubbed AutoShip that allows us to predict
+customer’s shipping choices with great accuracy.  Getting there was not so easy,
+however.  Our application is written in Ruby on Rails.  While our team is
+full of great software engineers and web development gurus, none of us were
+data scientists by trade.  Here are 3 lessons learned learned or relearned on the
+journey to bringing machine learning to our product.</p>
+
+<h3 id="build-on-the-shoulders-of-giants">1. Build on the Shoulders of Giants</h3>
+<p>Ever hear that truism?  Well, it was hammered home on this project.  I love <a href="https://www.ruby-lang.org/en/">Ruby</a> as
+a language and feel <a href="http://rubyonrails.org/">Rails</a> is a pretty good framework for building web applications.
+But its not exactly a paragon for scientific or statistical computing.  Looking
+for a machine learning lib in Ruby?  Good luck.  There are languages where machine
+learning libraries are much more mature and active.  R, Python, Scala are examples
+of languages with machine learning libraries that far outclass anything Ruby has to
+offer.  So we spiked a proof of concept using <a href="https://www.python.org/">Python</a> and <a href="http://scikit-learn.org/stable/">SciKit Learn</a> which got us off the
+ground and moving towards a final solution.</p>
+
+<p>The moral here is you really should use the best tool for the job.  We could have
+tried to fake-it-till-we-made-it as data scientists, or we could use the tools
+written by those who <em>are</em>.</p>
+
+<h3 id="play-to-your-strengths">2. Play To Your Strengths</h3>
+<p>We had spiked a workable solution, now we needed to bring it to the product.  Should
+we port to Ruby?  Should I stick with Python, the one that had brought us this far?
+We decided on the latter, implementing it as a small microservice web application
+using <a href="http://flask.pocoo.org/">Flask</a>.</p>
+
+<p>Services, even if you attach a micro prefix to them, bring a complexity to all
+environments – development, test/ci, production.  To help simplify this, I packaged
+the microservice application in a <a href="https://www.docker.com/">Docker</a> <a href="http://en.wikipedia.org/wiki/LXC">container</a>.  Thus it could be run in
+development without RoR developers having to set up a Python environment.  In
+production, we deploy the containerized application behind an <a href="http://www.haproxy.org/">Haproxy</a> load balancer,
+with <a href="https://www.serfdom.io/">Serf</a> managing the cluster of microservice containers to automagically add
+themselves to the load balancer.  This enables us to have a scalable infrastructure
+that can grow easily as our needs increase.  I plan to elaborate on this further
+in a future post.</p>
+
+<p>The upshot of all this is that implementing the feature as a microservice written
+in Python was much easier, at least for me, than trying to rewrite the excellent
+machine learning algorithms found in SciKit Learn in Ruby.  I am a systems engineer
+with devops skills, and coming up with a robust and scalable microservice
+infrastructure was more easily accomplished than suddenly reinventing myself as a
+data science uber geek.</p>
+
+<h3 id="polyglot-persistence--yes-its-a-thing">3. Polyglot Persistence.  Yes, its a thing.</h3>
+<p>We use <a href="http://www.postgresql.org/">Postgres</a> as our main database.  All of our order and shipment data lived
+there.  At first glance, it would seem like we should just use the data as found
+in the relational database to back the system.  But for a number of reasons,
+We decided to use <a href="https://www.elastic.co/">Elasticsearch</a> as the repository for the data that our system
+would use.</p>
+
+<p>First, it stores unstructured documents.  We weren’t exactly sure what data we
+would need, or how it might evolve over time.  We could shove literally anything
+into it and get it back out again without having to migrate a schema.  This
+was a very nice boon to have when being exploratory with the data to try and
+determine exactly what might yield the results we were after.</p>
+
+<p>Second, its fast and scalable.  If we denormalized an order, shipment and prediction
+data into the same document, we would not have to do any complex joins while trying to
+get large sets of order/shipment/prediction data used to train a machine learning
+algorithm.  And being elastically scalable would mean Elasicsearch could grow
+as much as we needed it to.</p>
+
+<p>Lastly, it has <a href="https://www.elastic.co/products/kibana">Kibana</a>, an amazing data visualiztaion tool.  I had already set up
+an Elasticsearch/Logstash/Kibana stack as outlined in a <a href="http://devquixote.com/devops/2014/10/20/scaling-logstash/">previous post</a>.  Pointing
+it at our order, shipment and prediction data has allowed us to have a tremendous
+ability to delve into our data.  Without writing any code, we could easily visualize
+the answers to questions like “For customer A, what were the packaging choices that
+were made for the innacurate predictions made by our service?”  It was invaluable
+during the exploratory phase, and is perhaps even more so as the feature is moving
+into support-mode post-rollout.</p>
+
+<h3 id="at-the-end-of-the-day">At the end of the day…</h3>
+<p>While we had some stumbles along the way, we were able to achieve our goals of
+providing &gt; 95% accuracy on predicting shipments for a customers orders.  In doing
+so, <a href="http://finance.yahoo.com/news/shippingeasy-introduces-industrys-first-smart-130000411.html">we are providing a great service for our customers that makes their jobs
+much easier</a>.  As for myself, I got to learn quite a bit about machine learning
+and using Linux containers in a production environment.  It was challenging, but
+a tremendous amount of fun.  Thanks, for the opportunity, ShippingEasy!</p>
+</div>
+  </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h3>
+          <a href="/devops/2014/10/20/scaling-logstash">
+            Scaling Logstash
+          </a>
+      </h3>
+    </div>
+    <div class="panel-body"><p>I’ve had to wear my dev ops hat for a bit at <a href="http://shippingeasy.com/">ShippingEasy</a>
+recently in setting up an ELK stack to provide log aggregation and operational analytics.
+That is <a href="http://www.elasticsearch.org/">Elasticsearch</a>, <a href="http://logstash.net/">Logstash</a>
+&amp; <a href="http://www.elasticsearch.org/overview/kibana/">Kibana</a>.  We’ve become pretty dependent
+on the infrastructure, as it enables us to keep an eye on how things are running and
+delve into problems in production when support escalations dictate devs get involved.
+Here is a view of our production web dashboard showing metrics like average response
+time, unicorn workers &amp; queue sizes.</p>
+
+<p><img src="/assets/images/logstash_web.png" alt="Web Dashboard" /></p>
+
+<p>When this was originally set up, it was done with
+<a href="https://github.com/elasticsearch/logstash-forwarder">Logstash-Forwarder</a> on each app server
+forwarding log events to Logstash which munged them and indexed them into Elasticsearch.
+We could then visualize those log events with Kibana.  This is a typical (possibly naive)
+setup that looks something like this:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">logstash-forwarder
+                   <span class="se">\</span>
+logstash-forwarder  &gt; logstash &gt; elasticsearch &lt; kibana
+                   /
+logstash-forwarder</code></pre></div>
+
+<p>To get views into the Rails stack, we parsed the log files using multiline and grok
+filters with custom patterns in Elasticsearch.  We got around log events interleaving
+with each other by having each unicorn process write to its own numbered log file.
+This worked well for awhile, but eventually we started to run into problems as traffic
+started to ramp up towards a holiday buying season.  Things would work for awhile, but
+then gaps of events would start to show up in Kibana, slowing to a trickle and eventually
+stop.</p>
+
+<p>Thankfully, it was not that our application was dying.  Logstash was.  Digging in, it
+turned out we had two problems that exacerbated and masked each other:</p>
+
+<ol>
+  <li>Logstash could not keep up with the demands of munging all of the log events we
+were sending to it.</li>
+  <li>Logstash 1.4.1-2 has a <a href="https://github.com/elasticsearch/logstash/issues/1509">bug in its TCP input</a>
+that causes it to have a connection leak when clients connecting to it start to time
+out due to the previous issue.</li>
+</ol>
+
+<p>We fixed the 2nd problem first, patching our version of Logstash with the latest code
+that fixes the connection bloom problem.  With that cleared up, we could look at what
+the bottleneck was within Logstash.</p>
+
+<p>Logstash is written in jRuby, and its internals are described as <a href="http://logstash.net/docs/1.4.2/life-of-an-event">a pipeline</a>.
+Things are processed by input, filter(worker) and output threads that do the work 
+that is set up in the input/filter/output stanzas of the configuration.  Each of
+these areas is fronted by a queue that can hold 20 elements.  The threads pull from
+the queue, do their work, pass it on to the next queue or out and repeat.  Out of the
+box, Logstash allocates one thread to each input, a single worker thread, and one
+thread for each output.  This looks something like this:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">input <span class="nb">source</span> --&gt; input thread   filter thread   output thread --&gt; output destination
+                            <span class="se">\ </span>  /           <span class="se">\ </span>  /
+                            queue           queue
+                            /   <span class="se">\ </span>          /   <span class="se">\</span>
+input <span class="nb">source</span> --&gt; input thread   filter thread   output thread --&gt; output destination</code></pre></div>
+
+<p>Problems crop up when any of these areas of Logstash cannot pull from its queue faster
+than it is filling up.  Logstash as a system backs up, with varying effects depending
+on what your input is.  In our case, it was Logstash-Forwarder connection timeouts and
+subsequent connection leaking on attempts to reconnect.  If Logstash was pulling from
+a redis list as a queue, it would be queue bloat.</p>
+
+<p>Using a combination of top and java thread dumps, we could see our bottleneck was in
+the filter worker thread.  The input threads and output threads had little CPU use
+and looked to be blocking on their empty queues at all times.  The filter worker thread
+was pegging a CPU core, however.  Easy enough, lets just up the number of worker
+threads in our Logstash deployment.</p>
+
+<p>Wrong.  Remember that multiline grok filtering I mentioned earlier?  Turns out that
+Logstash’s multiline filter is not thread safe and when you use it, you are limited to
+only using 1 worker thread.  Okay, then you simply move the multiline event collection
+into the input area of Logstash using a multline codec.  Nope, that won’t work either.
+The multline filter allows you to specify a stream_identity attribute that can be
+used to keep the events separated by file name.  The multiline input codec offers no
+such thing, which would mean all our efforts to keep rails multiline log messages
+separate from each other would be out the window.</p>
+
+<p>Now we had to step back and re-evaluate the infrastructure.  Ultimately, we decided
+to do the following:</p>
+
+<ol>
+  <li>Do the multi-line event roll up on the app server side.  This would become the
+responsibility of whatever was tailing the logs and shipping it to Logstash.  We could
+then chuck the multiline filter in Logstash and scale out our filter workers within
+a single Logstash process.</li>
+  <li>Use a redis list as a broker between the tailing daemon app-server side and Logstash
+so that we could have some event durability and have the potential to scale out to
+multiple Logstash processes on multiple machines to munge through our log data.</li>
+</ol>
+
+<p>Logstash forwarder supports neither mutli-line event roll up or communicating to
+redis, so this meant we had to find another tailing daemon that did, or we had to deploy
+Logstash itself to each app server.  We really did not want to do the latter, as it
+introduced java dependencies and seemed very heavy for what needed to be done.</p>
+
+<p>Enter <a href="https://github.com/josegonzalez/python-beaver">Beaver</a>, a log tailing daemon
+written in Python that supports both of the above requirements.  We did a quick 
+<a href="https://gist.github.com/lwoodson/1b0b34257e5ee652917c">proof of concept</a> to make
+sure it would work, deployed it to one web server to see how it performed over 24
+hours and then pushed it out across all our servers.  Things have been working well
+for several days with no service interruptions.  Now our infrastructure looks like
+this:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">beaver
+      <span class="se">\</span>
+beaver &gt; redis &lt; logstash &gt; elasticsearch &lt; kibana
+      /
+beaver</code></pre></div>
+
+<p>One Logstash instance is still enough for us after pushing multiline-roll up
+responsibilities to the Beaver on app servers and being able to use multiple threads/cores
+to do filter processing in Logstash.  But when increasing log traffic/size again
+starts to overwhelm Logstash, we are better positioned to scale out to multiple
+instances munging the data being pushed to redis:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">beaver           logstash
+      <span class="se">\ </span>        /        <span class="se">\</span>
+beaver &gt; redis &lt;          &gt; elasticsearch &lt; kibana
+      /         <span class="se">\ </span>       /
+beaver           logstash</code></pre></div>
+
+<p>It was an interesting 3-4 days spent in Logstash-scale land.  It is an amazing tool
+that really helps us deliver a quality experience to users of our application.  As
+part of an ELK stack, it is the 80% of <a href="http://www.splunk.com/">Splunk</a> that you
+really want at no cost.  But without paid licensing, you have to roll up your sleeves
+and get to work in cases like these.  Fortunately, there is a great
+community behind it and lots of help to be found on the web and in #logstash at
+freenode.</p>
+
+</div>
+  </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h3>
+          <a href="/software/2014/09/06/benchmarking-pdf-generation-in-ruby">
+            Benchmarking Pdf Generation In Ruby
+          </a>
+      </h3>
+    </div>
+    <div class="panel-body"><p>At <a href="http://shippingeasy.com/">ShippingEasy</a>, we use the ruby
+<a href="https://github.com/prawnpdf/prawn">Prawn gem</a> to generate shipping label PDFs
+for our customers.  This is where we make our money, and so having this be a
+fast and pain-free experience is crucial to our business.  Prawn has generally
+delivered finished PDFs well, but its performance has been not what we want.
+So I have started looking into how we can speed up this process.  Here are
+some early results of benchmarking some options including upgrading Ruby, pure
+jRuby and jRuby invoking Java.</p>
+
+<p>One thing I did early on was to just collect some basic benchmarking numbers
+for Prawn and its rendering of images into PDFs.  There were 4 test groups:</p>
+
+<ol>
+  <li>Prawn with Ruby 2.0.0 (at the time our current setup)</li>
+  <li>Prawn with Ruby 2.1.2 (an upgrade we were undergoing)</li>
+  <li>Prawn with jRuby and JIT compilation (no code changes)</li>
+  <li>Prawn with jRuby delegating the PDF work to a Java class using <a href="https://pdfbox.apache.org/">PDFBox</a></li>
+</ol>
+
+<p>The benchmark code used was
+<a href="https://github.com/prawnpdf/prawn/blob/master/bench/png_type_6.rb">Prawn’s png_type_6.rb</a>
+(or a java equivalent) and yielded some interesting results…</p>
+
+<table class="table table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Components</th>
+      <th>Time</th>
+      <th>Speed Increase</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ruby 2.0.0 + Prawn</td>
+      <td>6.65s</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Ruby 2.1.2 + Prawn</td>
+      <td>5.10s</td>
+      <td>130%</td>
+    </tr>
+    <tr>
+      <td>jRuby 1.7.12 (JIT) + Prawn</td>
+      <td>4.02s</td>
+      <td>165%</td>
+    </tr>
+    <tr>
+      <td>jRuby 1.7.12 + Java/PDFBox</td>
+      <td>3.26s</td>
+      <td>204%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>My takeaways from this are:</p>
+
+<ol>
+  <li>Upgrade to ruby 2.1.2.  Performance boosts + no code change = win.</li>
+  <li>jRuby’s JIT compilation option is no joke.  Your code interprets
+to bytecode once and subsequent invocations run the compiled bytecode more
+fast than MRI interprets ruby.</li>
+  <li>The interoperability between jRuby/Java is a nice feature.  I came up through
+the java ranks, so being able to drop to it (instead of C) when needing to
+go to a lower-level for performance is handy.</li>
+</ol>
+
+<p>We have only upgraded to ruby 2.1.2 at this point, and I do not know if we’ll
+wind up doing anything else here.  Even so, its nice to know
+we have additional options if we need to continue to improve performance in this
+area.</p>
+
+<p>For the Java/PDF box benchmark, I used the following code:</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="lineno"> 1</span> <span class="c1"># encoding: utf-8</span>
+<span class="lineno"> 2</span> 
+<span class="lineno"> 3</span> <span class="vg">$LOAD_PATH</span><span class="o">.</span><span class="n">unshift</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;lib&#39;</span><span class="p">))</span>
+<span class="lineno"> 4</span> <span class="nb">require</span> <span class="s2">&quot;benchmark&quot;</span>
+<span class="lineno"> 5</span> <span class="nb">require</span> <span class="s1">&#39;java&#39;</span>
+<span class="lineno"> 6</span> <span class="nb">require</span> <span class="s1">&#39;target/javapdf-1.0-SNAPSHOT-jar-with-dependencies.jar&#39;</span>
+<span class="lineno"> 7</span> <span class="n">java_import</span> <span class="n">com</span><span class="o">.</span><span class="n">shippingeasy</span><span class="o">.</span><span class="n">javapdf</span><span class="o">.</span><span class="n">CreatePdf</span>
+<span class="lineno"> 8</span> <span class="n">pdf_creator</span> <span class="o">=</span> <span class="no">CreatePdf</span><span class="o">.</span><span class="n">new</span>
+<span class="lineno"> 9</span> 
+<span class="lineno">10</span> <span class="n">N</span><span class="o">=</span><span class="mi">100</span>
+<span class="lineno">11</span> 
+<span class="lineno">12</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">bmbm</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+<span class="lineno">13</span>   <span class="n">x</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s2">&quot;PNG Type 6&quot;</span><span class="p">)</span> <span class="k">do</span>
+<span class="lineno">14</span>     <span class="n">N</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
+<span class="lineno">15</span>       <span class="n">pdf_creator</span><span class="o">.</span><span class="n">generate</span>
+<span class="lineno">16</span>     <span class="k">end</span>
+<span class="lineno">17</span>   <span class="k">end</span>
+<span class="lineno">18</span> <span class="k">end</span></code></pre></div>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="lineno"> 1</span> <span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">shippingeasy</span><span class="o">.</span><span class="na">javapdf</span><span class="o">;</span>
+<span class="lineno"> 2</span> 
+<span class="lineno"> 3</span> <span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="lineno"> 4</span> <span class="kn">import</span> <span class="nn">java.awt.image.BufferedImage</span><span class="o">;</span>
+<span class="lineno"> 5</span> <span class="kn">import</span> <span class="nn">javax.imageio.ImageIO</span><span class="o">;</span>
+<span class="lineno"> 6</span> 
+<span class="lineno"> 7</span> <span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.*</span><span class="o">;</span>
+<span class="lineno"> 8</span> <span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.edit.*</span><span class="o">;</span>
+<span class="lineno"> 9</span> <span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.graphics.xobject.*</span><span class="o">;</span>
+<span class="lineno">10</span> 
+<span class="lineno">11</span> <span class="kd">public</span> <span class="kd">class</span> <span class="nc">CreatePdf</span> <span class="o">{</span>
+<span class="lineno">12</span>   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">generate</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+<span class="lineno">13</span>     <span class="n">PDDocument</span> <span class="n">doc</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="lineno">14</span>     <span class="k">try</span> <span class="o">{</span>
+<span class="lineno">15</span>       <span class="n">doc</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">PDDocument</span><span class="o">();</span>
+<span class="lineno">16</span>       <span class="n">drawImage</span><span class="o">(</span><span class="n">doc</span><span class="o">);</span>
+<span class="lineno">17</span>       <span class="n">doc</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="s">&quot;dice.pdf&quot;</span><span class="o">);</span>
+<span class="lineno">18</span>     <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+<span class="lineno">19</span>       <span class="k">if</span> <span class="o">(</span><span class="n">doc</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+<span class="lineno">20</span>         <span class="n">doc</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+<span class="lineno">21</span>       <span class="o">}</span>
+<span class="lineno">22</span>     <span class="o">}</span>
+<span class="lineno">23</span>   <span class="o">}</span>
+<span class="lineno">24</span> 
+<span class="lineno">25</span>   <span class="kd">private</span> <span class="kt">void</span> <span class="nf">drawImage</span><span class="o">(</span><span class="n">PDDocument</span> <span class="n">doc</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+<span class="lineno">26</span>     <span class="n">PDPage</span> <span class="n">page</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">PDPage</span><span class="o">();</span>
+<span class="lineno">27</span>     <span class="n">doc</span><span class="o">.</span><span class="na">addPage</span><span class="o">(</span><span class="n">page</span><span class="o">);</span>
+<span class="lineno">28</span>     <span class="n">PDPageContentStream</span> <span class="n">content</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">PDPageContentStream</span><span class="o">(</span><span class="n">doc</span><span class="o">,</span> <span class="n">page</span><span class="o">);</span>
+<span class="lineno">29</span>     <span class="n">content</span><span class="o">.</span><span class="na">drawImage</span><span class="o">(</span><span class="n">xImage</span><span class="o">(</span><span class="n">doc</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+<span class="lineno">30</span>     <span class="n">content</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+<span class="lineno">31</span>   <span class="o">}</span>
+<span class="lineno">32</span> 
+<span class="lineno">33</span>   <span class="kd">private</span> <span class="n">PDXObjectImage</span> <span class="nf">xImage</span><span class="o">(</span><span class="n">PDDocument</span> <span class="n">doc</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+<span class="lineno">34</span>     <span class="n">BufferedImage</span> <span class="n">img</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="s">&quot;data/images/dice.png&quot;</span><span class="o">));</span>
+<span class="lineno">35</span>     <span class="k">return</span> <span class="k">new</span> <span class="nf">PDPixelMap</span><span class="o">(</span><span class="n">doc</span><span class="o">,</span> <span class="n">img</span><span class="o">);</span>
+<span class="lineno">36</span>   <span class="o">}</span>
+<span class="lineno">37</span> <span class="o">}</span></code></pre></div>
+
+</div>
+  </div>
+
+
+          <hr>
+          <footer>
+            <p>
+              &copy; 2015 Name Lastname
+              <span class="pull-right text-muted">
+                powered by
+                <a href="http://dbtek.github.io/jekyll-bootstrap-3" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll-Bootstrap-3</a>
+                and <a href="http://getbootstrap.com" target="_blank">Twitter Bootstrap 3.0.3</a>
+              </span>
+            </p>
+          </footer>
+        </div>
+        <div class="col-md-3">
+          <div id="profile-anchor"></div>
+          <div id="profile" class="well">
+            <img src="/assets/themes/bootstrap/img/lance-woodson.jpg"/>
+            <h2>Lance Woodson</h2>
+            <h4>Dev + Ops + Data</h4>
+            <hr/>
+            Contact
+            <a href="http://www.linkedin.com/pub/lance-woodson/23/747/503"><i class="fa fa-linkedin-square"></i></a>
+            &#160;
+            <a href="https://twitter.com/LanceWoodson"><i class="fa fa-twitter-square"></i></a>
+            &#160;
+            <a href="mailto:lance@webmaneuvers.com"><i class="fa fa-envelope"></i></a>
+            <br/>
+            View
+            &#160;
+            <a href="http://stackexchange.com/users/1804263/lance-woodson"><i class="fa fa-stack-exchange"></i></a>
+            <a href="http://jsfiddle.net/user/lwoodson/fiddles/"><i class="fa fa-jsfiddle"></i></a>
+            &#160;
+            <a href="https://github.com/lwoodson"><i class="fa fa-github"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <script src="/assets/themes/bootstrap/resources/jquery/jquery.min.js"></script>
+    <script src="/assets/themes/bootstrap/resources/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
+

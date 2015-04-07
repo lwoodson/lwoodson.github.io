@@ -1,28 +1,394 @@
----
-layout: nil
-title : Atom Feed
----
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
  
- <title>{{ site.title }}</title>
- <link href="{{ site.production_url }}/{{ site.atom_path }}" rel="self"/>
- <link href="{{ site.production_url }}"/>
- <updated>{{ site.time | date_to_xmlschema }}</updated>
- <id>{{ site.production_url }}</id>
+ <title>DEVQUIXOTE</title>
+ <link href="http://username.github.io/" rel="self"/>
+ <link href="http://username.github.io"/>
+ <updated>2015-04-06T23:01:13-05:00</updated>
+ <id>http://username.github.io</id>
  <author>
-   <name>{{ site.author.name }}</name>
-   <email>{{ site.author.email }}</email>
+   <name>Name Lastname</name>
+   <email>blah@email.test</email>
  </author>
 
- {% for post in site.posts %}
+ 
  <entry>
-   <title>{{ post.title }}</title>
-   <link href="{{ site.production_url }}{{ post.url }}"/>
-   <updated>{{ post.date | date_to_xmlschema }}</updated>
-   <id>{{ site.production_url }}{{ post.id }}</id>
-   <content type="html">{{ post.content | xml_escape }}</content>
+   <title>Machine Learning In A Rails App</title>
+   <link href="http://username.github.io/data/2015/04/06/machine-learning-in-a-rails-app"/>
+   <updated>2015-04-06T00:00:00-05:00</updated>
+   <id>http://username.github.io/data/2015/04/06/machine-learning-in-a-rails-app</id>
+   <content type="html">&lt;p&gt;At &lt;a href=&quot;http://shippingeasy.com/&quot;&gt;ShippingEasy&lt;/a&gt;, we take customer’s orders from various online storefronts and allow
+the customer to easily generate shipping labels to fulfill those orders at a reduced
+cost.  To make life even easier on our customers, we wanted to automate the process
+of decision making when purchasing a label.  After all, we had a large example set
+of data for them – the orders we’ve received and the various shipping choices
+that were made from them.  Given that data, couldn’t we use machine learning to
+infer what actions a customer would taken when confronted with an order in our
+UI?&lt;/p&gt;
+
+&lt;iframe width=&quot;560&quot; height=&quot;420&quot; src=&quot;http://www.youtube.com/embed/b49OJZlMEgo?color=white&amp;amp;theme=light&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;The answer was yes.  We developed a system dubbed AutoShip that allows us to predict
+customer’s shipping choices with great accuracy.  Getting there was not so easy,
+however.  Our application is written in Ruby on Rails.  While our team is
+full of great software engineers and web development gurus, none of us were
+data scientists by trade.  Here are 3 lessons learned learned or relearned on the
+journey to bringing machine learning to our product.&lt;/p&gt;
+
+&lt;h3 id=&quot;build-on-the-shoulders-of-giants&quot;&gt;1. Build on the Shoulders of Giants&lt;/h3&gt;
+&lt;p&gt;Ever hear that truism?  Well, it was hammered home on this project.  I love &lt;a href=&quot;https://www.ruby-lang.org/en/&quot;&gt;Ruby&lt;/a&gt; as
+a language and feel &lt;a href=&quot;http://rubyonrails.org/&quot;&gt;Rails&lt;/a&gt; is a pretty good framework for building web applications.
+But its not exactly a paragon for scientific or statistical computing.  Looking
+for a machine learning lib in Ruby?  Good luck.  There are languages where machine
+learning libraries are much more mature and active.  R, Python, Scala are examples
+of languages with machine learning libraries that far outclass anything Ruby has to
+offer.  So we spiked a proof of concept using &lt;a href=&quot;https://www.python.org/&quot;&gt;Python&lt;/a&gt; and &lt;a href=&quot;http://scikit-learn.org/stable/&quot;&gt;SciKit Learn&lt;/a&gt; which got us off the
+ground and moving towards a final solution.&lt;/p&gt;
+
+&lt;p&gt;The moral here is you really should use the best tool for the job.  We could have
+tried to fake-it-till-we-made-it as data scientists, or we could use the tools
+written by those who &lt;em&gt;are&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;play-to-your-strengths&quot;&gt;2. Play To Your Strengths&lt;/h3&gt;
+&lt;p&gt;We had spiked a workable solution, now we needed to bring it to the product.  Should
+we port to Ruby?  Should I stick with Python, the one that had brought us this far?
+We decided on the latter, implementing it as a small microservice web application
+using &lt;a href=&quot;http://flask.pocoo.org/&quot;&gt;Flask&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Services, even if you attach a micro prefix to them, bring a complexity to all
+environments – development, test/ci, production.  To help simplify this, I packaged
+the microservice application in a &lt;a href=&quot;https://www.docker.com/&quot;&gt;Docker&lt;/a&gt; &lt;a href=&quot;http://en.wikipedia.org/wiki/LXC&quot;&gt;container&lt;/a&gt;.  Thus it could be run in
+development without RoR developers having to set up a Python environment.  In
+production, we deploy the containerized application behind an &lt;a href=&quot;http://www.haproxy.org/&quot;&gt;Haproxy&lt;/a&gt; load balancer,
+with &lt;a href=&quot;https://www.serfdom.io/&quot;&gt;Serf&lt;/a&gt; managing the cluster of microservice containers to automagically add
+themselves to the load balancer.  This enables us to have a scalable infrastructure
+that can grow easily as our needs increase.  I plan to elaborate on this further
+in a future post.&lt;/p&gt;
+
+&lt;p&gt;The upshot of all this is that implementing the feature as a microservice written
+in Python was much easier, at least for me, than trying to rewrite the excellent
+machine learning algorithms found in SciKit Learn in Ruby.  I am a systems engineer
+with devops skills, and coming up with a robust and scalable microservice
+infrastructure was more easily accomplished than suddenly reinventing myself as a
+data science uber geek.&lt;/p&gt;
+
+&lt;h3 id=&quot;polyglot-persistence--yes-its-a-thing&quot;&gt;3. Polyglot Persistence.  Yes, its a thing.&lt;/h3&gt;
+&lt;p&gt;We use &lt;a href=&quot;http://www.postgresql.org/&quot;&gt;Postgres&lt;/a&gt; as our main database.  All of our order and shipment data lived
+there.  At first glance, it would seem like we should just use the data as found
+in the relational database to back the system.  But for a number of reasons,
+We decided to use &lt;a href=&quot;https://www.elastic.co/&quot;&gt;Elasticsearch&lt;/a&gt; as the repository for the data that our system
+would use.&lt;/p&gt;
+
+&lt;p&gt;First, it stores unstructured documents.  We weren’t exactly sure what data we
+would need, or how it might evolve over time.  We could shove literally anything
+into it and get it back out again without having to migrate a schema.  This
+was a very nice boon to have when being exploratory with the data to try and
+determine exactly what might yield the results we were after.&lt;/p&gt;
+
+&lt;p&gt;Second, its fast and scalable.  If we denormalized an order, shipment and prediction
+data into the same document, we would not have to do any complex joins while trying to
+get large sets of order/shipment/prediction data used to train a machine learning
+algorithm.  And being elastically scalable would mean Elasicsearch could grow
+as much as we needed it to.&lt;/p&gt;
+
+&lt;p&gt;Lastly, it has &lt;a href=&quot;https://www.elastic.co/products/kibana&quot;&gt;Kibana&lt;/a&gt;, an amazing data visualiztaion tool.  I had already set up
+an Elasticsearch/Logstash/Kibana stack as outlined in a &lt;a href=&quot;http://devquixote.com/devops/2014/10/20/scaling-logstash/&quot;&gt;previous post&lt;/a&gt;.  Pointing
+it at our order, shipment and prediction data has allowed us to have a tremendous
+ability to delve into our data.  Without writing any code, we could easily visualize
+the answers to questions like “For customer A, what were the packaging choices that
+were made for the innacurate predictions made by our service?”  It was invaluable
+during the exploratory phase, and is perhaps even more so as the feature is moving
+into support-mode post-rollout.&lt;/p&gt;
+
+&lt;h3 id=&quot;at-the-end-of-the-day&quot;&gt;At the end of the day…&lt;/h3&gt;
+&lt;p&gt;While we had some stumbles along the way, we were able to achieve our goals of
+providing &amp;gt; 95% accuracy on predicting shipments for a customers orders.  In doing
+so, &lt;a href=&quot;http://finance.yahoo.com/news/shippingeasy-introduces-industrys-first-smart-130000411.html&quot;&gt;we are providing a great service for our customers that makes their jobs
+much easier&lt;/a&gt;.  As for myself, I got to learn quite a bit about machine learning
+and using Linux containers in a production environment.  It was challenging, but
+a tremendous amount of fun.  Thanks, for the opportunity, ShippingEasy!&lt;/p&gt;
+</content>
  </entry>
- {% endfor %}
+ 
+ <entry>
+   <title>Scaling Logstash</title>
+   <link href="http://username.github.io/devops/2014/10/20/scaling-logstash"/>
+   <updated>2014-10-20T00:00:00-05:00</updated>
+   <id>http://username.github.io/devops/2014/10/20/scaling-logstash</id>
+   <content type="html">&lt;p&gt;I’ve had to wear my dev ops hat for a bit at &lt;a href=&quot;http://shippingeasy.com/&quot;&gt;ShippingEasy&lt;/a&gt;
+recently in setting up an ELK stack to provide log aggregation and operational analytics.
+That is &lt;a href=&quot;http://www.elasticsearch.org/&quot;&gt;Elasticsearch&lt;/a&gt;, &lt;a href=&quot;http://logstash.net/&quot;&gt;Logstash&lt;/a&gt;
+&amp;amp; &lt;a href=&quot;http://www.elasticsearch.org/overview/kibana/&quot;&gt;Kibana&lt;/a&gt;.  We’ve become pretty dependent
+on the infrastructure, as it enables us to keep an eye on how things are running and
+delve into problems in production when support escalations dictate devs get involved.
+Here is a view of our production web dashboard showing metrics like average response
+time, unicorn workers &amp;amp; queue sizes.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/logstash_web.png&quot; alt=&quot;Web Dashboard&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When this was originally set up, it was done with
+&lt;a href=&quot;https://github.com/elasticsearch/logstash-forwarder&quot;&gt;Logstash-Forwarder&lt;/a&gt; on each app server
+forwarding log events to Logstash which munged them and indexed them into Elasticsearch.
+We could then visualize those log events with Kibana.  This is a typical (possibly naive)
+setup that looks something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;logstash-forwarder
+                   &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+logstash-forwarder  &amp;gt; logstash &amp;gt; elasticsearch &amp;lt; kibana
+                   /
+logstash-forwarder&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To get views into the Rails stack, we parsed the log files using multiline and grok
+filters with custom patterns in Elasticsearch.  We got around log events interleaving
+with each other by having each unicorn process write to its own numbered log file.
+This worked well for awhile, but eventually we started to run into problems as traffic
+started to ramp up towards a holiday buying season.  Things would work for awhile, but
+then gaps of events would start to show up in Kibana, slowing to a trickle and eventually
+stop.&lt;/p&gt;
+
+&lt;p&gt;Thankfully, it was not that our application was dying.  Logstash was.  Digging in, it
+turned out we had two problems that exacerbated and masked each other:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Logstash could not keep up with the demands of munging all of the log events we
+were sending to it.&lt;/li&gt;
+  &lt;li&gt;Logstash 1.4.1-2 has a &lt;a href=&quot;https://github.com/elasticsearch/logstash/issues/1509&quot;&gt;bug in its TCP input&lt;/a&gt;
+that causes it to have a connection leak when clients connecting to it start to time
+out due to the previous issue.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We fixed the 2nd problem first, patching our version of Logstash with the latest code
+that fixes the connection bloom problem.  With that cleared up, we could look at what
+the bottleneck was within Logstash.&lt;/p&gt;
+
+&lt;p&gt;Logstash is written in jRuby, and its internals are described as &lt;a href=&quot;http://logstash.net/docs/1.4.2/life-of-an-event&quot;&gt;a pipeline&lt;/a&gt;.
+Things are processed by input, filter(worker) and output threads that do the work 
+that is set up in the input/filter/output stanzas of the configuration.  Each of
+these areas is fronted by a queue that can hold 20 elements.  The threads pull from
+the queue, do their work, pass it on to the next queue or out and repeat.  Out of the
+box, Logstash allocates one thread to each input, a single worker thread, and one
+thread for each output.  This looks something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;input &lt;span class=&quot;nb&quot;&gt;source&lt;/span&gt; --&amp;gt; input thread   filter thread   output thread --&amp;gt; output destination
+                            &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;  /           &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;  /
+                            queue           queue
+                            /   &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;          /   &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+input &lt;span class=&quot;nb&quot;&gt;source&lt;/span&gt; --&amp;gt; input thread   filter thread   output thread --&amp;gt; output destination&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Problems crop up when any of these areas of Logstash cannot pull from its queue faster
+than it is filling up.  Logstash as a system backs up, with varying effects depending
+on what your input is.  In our case, it was Logstash-Forwarder connection timeouts and
+subsequent connection leaking on attempts to reconnect.  If Logstash was pulling from
+a redis list as a queue, it would be queue bloat.&lt;/p&gt;
+
+&lt;p&gt;Using a combination of top and java thread dumps, we could see our bottleneck was in
+the filter worker thread.  The input threads and output threads had little CPU use
+and looked to be blocking on their empty queues at all times.  The filter worker thread
+was pegging a CPU core, however.  Easy enough, lets just up the number of worker
+threads in our Logstash deployment.&lt;/p&gt;
+
+&lt;p&gt;Wrong.  Remember that multiline grok filtering I mentioned earlier?  Turns out that
+Logstash’s multiline filter is not thread safe and when you use it, you are limited to
+only using 1 worker thread.  Okay, then you simply move the multiline event collection
+into the input area of Logstash using a multline codec.  Nope, that won’t work either.
+The multline filter allows you to specify a stream_identity attribute that can be
+used to keep the events separated by file name.  The multiline input codec offers no
+such thing, which would mean all our efforts to keep rails multiline log messages
+separate from each other would be out the window.&lt;/p&gt;
+
+&lt;p&gt;Now we had to step back and re-evaluate the infrastructure.  Ultimately, we decided
+to do the following:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Do the multi-line event roll up on the app server side.  This would become the
+responsibility of whatever was tailing the logs and shipping it to Logstash.  We could
+then chuck the multiline filter in Logstash and scale out our filter workers within
+a single Logstash process.&lt;/li&gt;
+  &lt;li&gt;Use a redis list as a broker between the tailing daemon app-server side and Logstash
+so that we could have some event durability and have the potential to scale out to
+multiple Logstash processes on multiple machines to munge through our log data.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Logstash forwarder supports neither mutli-line event roll up or communicating to
+redis, so this meant we had to find another tailing daemon that did, or we had to deploy
+Logstash itself to each app server.  We really did not want to do the latter, as it
+introduced java dependencies and seemed very heavy for what needed to be done.&lt;/p&gt;
+
+&lt;p&gt;Enter &lt;a href=&quot;https://github.com/josegonzalez/python-beaver&quot;&gt;Beaver&lt;/a&gt;, a log tailing daemon
+written in Python that supports both of the above requirements.  We did a quick 
+&lt;a href=&quot;https://gist.github.com/lwoodson/1b0b34257e5ee652917c&quot;&gt;proof of concept&lt;/a&gt; to make
+sure it would work, deployed it to one web server to see how it performed over 24
+hours and then pushed it out across all our servers.  Things have been working well
+for several days with no service interruptions.  Now our infrastructure looks like
+this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;beaver
+      &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+beaver &amp;gt; redis &amp;lt; logstash &amp;gt; elasticsearch &amp;lt; kibana
+      /
+beaver&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;One Logstash instance is still enough for us after pushing multiline-roll up
+responsibilities to the Beaver on app servers and being able to use multiple threads/cores
+to do filter processing in Logstash.  But when increasing log traffic/size again
+starts to overwhelm Logstash, we are better positioned to scale out to multiple
+instances munging the data being pushed to redis:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;beaver           logstash
+      &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;        /        &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+beaver &amp;gt; redis &amp;lt;          &amp;gt; elasticsearch &amp;lt; kibana
+      /         &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;       /
+beaver           logstash&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It was an interesting 3-4 days spent in Logstash-scale land.  It is an amazing tool
+that really helps us deliver a quality experience to users of our application.  As
+part of an ELK stack, it is the 80% of &lt;a href=&quot;http://www.splunk.com/&quot;&gt;Splunk&lt;/a&gt; that you
+really want at no cost.  But without paid licensing, you have to roll up your sleeves
+and get to work in cases like these.  Fortunately, there is a great
+community behind it and lots of help to be found on the web and in #logstash at
+freenode.&lt;/p&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Benchmarking Pdf Generation In Ruby</title>
+   <link href="http://username.github.io/software/2014/09/06/benchmarking-pdf-generation-in-ruby"/>
+   <updated>2014-09-06T00:00:00-05:00</updated>
+   <id>http://username.github.io/software/2014/09/06/benchmarking-pdf-generation-in-ruby</id>
+   <content type="html">&lt;p&gt;At &lt;a href=&quot;http://shippingeasy.com/&quot;&gt;ShippingEasy&lt;/a&gt;, we use the ruby
+&lt;a href=&quot;https://github.com/prawnpdf/prawn&quot;&gt;Prawn gem&lt;/a&gt; to generate shipping label PDFs
+for our customers.  This is where we make our money, and so having this be a
+fast and pain-free experience is crucial to our business.  Prawn has generally
+delivered finished PDFs well, but its performance has been not what we want.
+So I have started looking into how we can speed up this process.  Here are
+some early results of benchmarking some options including upgrading Ruby, pure
+jRuby and jRuby invoking Java.&lt;/p&gt;
+
+&lt;p&gt;One thing I did early on was to just collect some basic benchmarking numbers
+for Prawn and its rendering of images into PDFs.  There were 4 test groups:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Prawn with Ruby 2.0.0 (at the time our current setup)&lt;/li&gt;
+  &lt;li&gt;Prawn with Ruby 2.1.2 (an upgrade we were undergoing)&lt;/li&gt;
+  &lt;li&gt;Prawn with jRuby and JIT compilation (no code changes)&lt;/li&gt;
+  &lt;li&gt;Prawn with jRuby delegating the PDF work to a Java class using &lt;a href=&quot;https://pdfbox.apache.org/&quot;&gt;PDFBox&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The benchmark code used was
+&lt;a href=&quot;https://github.com/prawnpdf/prawn/blob/master/bench/png_type_6.rb&quot;&gt;Prawn’s png_type_6.rb&lt;/a&gt;
+(or a java equivalent) and yielded some interesting results…&lt;/p&gt;
+
+&lt;table class=&quot;table table-striped table-bordered&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Components&lt;/th&gt;
+      &lt;th&gt;Time&lt;/th&gt;
+      &lt;th&gt;Speed Increase&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Ruby 2.0.0 + Prawn&lt;/td&gt;
+      &lt;td&gt;6.65s&lt;/td&gt;
+      &lt;td&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Ruby 2.1.2 + Prawn&lt;/td&gt;
+      &lt;td&gt;5.10s&lt;/td&gt;
+      &lt;td&gt;130%&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;jRuby 1.7.12 (JIT) + Prawn&lt;/td&gt;
+      &lt;td&gt;4.02s&lt;/td&gt;
+      &lt;td&gt;165%&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;jRuby 1.7.12 + Java/PDFBox&lt;/td&gt;
+      &lt;td&gt;3.26s&lt;/td&gt;
+      &lt;td&gt;204%&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;My takeaways from this are:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Upgrade to ruby 2.1.2.  Performance boosts + no code change = win.&lt;/li&gt;
+  &lt;li&gt;jRuby’s JIT compilation option is no joke.  Your code interprets
+to bytecode once and subsequent invocations run the compiled bytecode more
+fast than MRI interprets ruby.&lt;/li&gt;
+  &lt;li&gt;The interoperability between jRuby/Java is a nice feature.  I came up through
+the java ranks, so being able to drop to it (instead of C) when needing to
+go to a lower-level for performance is handy.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We have only upgraded to ruby 2.1.2 at this point, and I do not know if we’ll
+wind up doing anything else here.  Even so, its nice to know
+we have additional options if we need to continue to improve performance in this
+area.&lt;/p&gt;
+
+&lt;p&gt;For the Java/PDF box benchmark, I used the following code:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;lineno&quot;&gt; 1&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# encoding: utf-8&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 2&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt; 3&lt;/span&gt; &lt;span class=&quot;vg&quot;&gt;$LOAD_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unshift&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;__FILE__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;..&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;lib&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 4&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;benchmark&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 5&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 6&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;target/javapdf-1.0-SNAPSHOT-jar-with-dependencies.jar&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 7&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java_import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;com&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shippingeasy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;javapdf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CreatePdf&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pdf_creator&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CreatePdf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 9&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;11&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt;12&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Benchmark&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bmbm&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;13&lt;/span&gt;   &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;report&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;PNG Type 6&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;14&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;times&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;15&lt;/span&gt;       &lt;span class=&quot;n&quot;&gt;pdf_creator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;generate&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;16&lt;/span&gt;     &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;17&lt;/span&gt;   &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;18&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;lineno&quot;&gt; 1&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;com&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;shippingeasy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;javapdf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 2&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt; 3&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;java.io.File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 4&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;java.awt.image.BufferedImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 5&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;javax.imageio.ImageIO&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 6&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt; 7&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;org.apache.pdfbox.pdmodel.*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 8&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;org.apache.pdfbox.pdmodel.edit.*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt; 9&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;org.apache.pdfbox.pdmodel.graphics.xobject.*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;10&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt;11&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CreatePdf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;12&lt;/span&gt;   &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;generate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;13&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;PDDocument&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;14&lt;/span&gt;     &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;15&lt;/span&gt;       &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PDDocument&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;16&lt;/span&gt;       &lt;span class=&quot;n&quot;&gt;drawImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;17&lt;/span&gt;       &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dice.pdf&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;18&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;finally&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;19&lt;/span&gt;       &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;20&lt;/span&gt;         &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;21&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;22&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;23&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;24&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt;25&lt;/span&gt;   &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;drawImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PDDocument&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;26&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;PDPage&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;page&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PDPage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;27&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addPage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;page&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;28&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;PDPageContentStream&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PDPageContentStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;page&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;29&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;30&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;31&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;32&lt;/span&gt; 
+&lt;span class=&quot;lineno&quot;&gt;33&lt;/span&gt;   &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PDXObjectImage&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;xImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PDDocument&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;34&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;BufferedImage&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ImageIO&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;data/images/dice.png&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;35&lt;/span&gt;     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PDPixelMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;img&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;36&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;lineno&quot;&gt;37&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+</content>
+ </entry>
+ 
  
 </feed>

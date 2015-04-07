@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Benchmarking Pdf Generation In Ruby</title>
+    
+    <meta name="author" content="Name Lastname">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Nunito:300,400' rel='stylesheet' type='text/css'>
+    <link href="/assets/themes/bootstrap/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/bootstrap/css/style.css" rel="stylesheet">
+  
+    <!--[if lt IE 9]>
+      <script src="/assets/themes/bootstrap/resources/respond/Respond.min.js"></script>
+    <![endif]-->
+
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+    <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="/assets/themes/bootstrap/js/site.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">DEVQUIXOTE</a>
+        </div>
+
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3>
+                  Benchmarking Pdf Generation In Ruby
+              </h3>
+            </div>
+
+            <div class="panel-body"><p>At <a href="http://shippingeasy.com/">ShippingEasy</a>, we use the ruby
+<a href="https://github.com/prawnpdf/prawn">Prawn gem</a> to generate shipping label PDFs
+for our customers.  This is where we make our money, and so having this be a
+fast and pain-free experience is crucial to our business.  Prawn has generally
+delivered finished PDFs well, but its performance has been not what we want.
+So I have started looking into how we can speed up this process.  Here are
+some early results of benchmarking some options including upgrading Ruby, pure
+jRuby and jRuby invoking Java.</p>
+
+<p>One thing I did early on was to just collect some basic benchmarking numbers
+for Prawn and its rendering of images into PDFs.  There were 4 test groups:</p>
+
+<ol>
+  <li>Prawn with Ruby 2.0.0 (at the time our current setup)</li>
+  <li>Prawn with Ruby 2.1.2 (an upgrade we were undergoing)</li>
+  <li>Prawn with jRuby and JIT compilation (no code changes)</li>
+  <li>Prawn with jRuby delegating the PDF work to a Java class using <a href="https://pdfbox.apache.org/">PDFBox</a></li>
+</ol>
+
+<p>The benchmark code used was
+<a href="https://github.com/prawnpdf/prawn/blob/master/bench/png_type_6.rb">Prawn’s png_type_6.rb</a>
+(or a java equivalent) and yielded some interesting results…</p>
+
+<table class="table table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Components</th>
+      <th>Time</th>
+      <th>Speed Increase</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ruby 2.0.0 + Prawn</td>
+      <td>6.65s</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Ruby 2.1.2 + Prawn</td>
+      <td>5.10s</td>
+      <td>130%</td>
+    </tr>
+    <tr>
+      <td>jRuby 1.7.12 (JIT) + Prawn</td>
+      <td>4.02s</td>
+      <td>165%</td>
+    </tr>
+    <tr>
+      <td>jRuby 1.7.12 + Java/PDFBox</td>
+      <td>3.26s</td>
+      <td>204%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>My takeaways from this are:</p>
+
+<ol>
+  <li>Upgrade to ruby 2.1.2.  Performance boosts + no code change = win.</li>
+  <li>jRuby’s JIT compilation option is no joke.  Your code interprets
+to bytecode once and subsequent invocations run the compiled bytecode more
+fast than MRI interprets ruby.</li>
+  <li>The interoperability between jRuby/Java is a nice feature.  I came up through
+the java ranks, so being able to drop to it (instead of C) when needing to
+go to a lower-level for performance is handy.</li>
+</ol>
+
+<p>We have only upgraded to ruby 2.1.2 at this point, and I do not know if we’ll
+wind up doing anything else here.  Even so, its nice to know
+we have additional options if we need to continue to improve performance in this
+area.</p>
+
+<p>For the Java/PDF box benchmark, I used the following code:</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="lineno"> 1</span> <span class="c1"># encoding: utf-8</span>
+<span class="lineno"> 2</span> 
+<span class="lineno"> 3</span> <span class="vg">$LOAD_PATH</span><span class="o">.</span><span class="n">unshift</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;lib&#39;</span><span class="p">))</span>
+<span class="lineno"> 4</span> <span class="nb">require</span> <span class="s2">&quot;benchmark&quot;</span>
+<span class="lineno"> 5</span> <span class="nb">require</span> <span class="s1">&#39;java&#39;</span>
+<span class="lineno"> 6</span> <span class="nb">require</span> <span class="s1">&#39;target/javapdf-1.0-SNAPSHOT-jar-with-dependencies.jar&#39;</span>
+<span class="lineno"> 7</span> <span class="n">java_import</span> <span class="n">com</span><span class="o">.</span><span class="n">shippingeasy</span><span class="o">.</span><span class="n">javapdf</span><span class="o">.</span><span class="n">CreatePdf</span>
+<span class="lineno"> 8</span> <span class="n">pdf_creator</span> <span class="o">=</span> <span class="no">CreatePdf</span><span class="o">.</span><span class="n">new</span>
+<span class="lineno"> 9</span> 
+<span class="lineno">10</span> <span class="n">N</span><span class="o">=</span><span class="mi">100</span>
+<span class="lineno">11</span> 
+<span class="lineno">12</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">bmbm</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+<span class="lineno">13</span>   <span class="n">x</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s2">&quot;PNG Type 6&quot;</span><span class="p">)</span> <span class="k">do</span>
+<span class="lineno">14</span>     <span class="n">N</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
+<span class="lineno">15</span>       <span class="n">pdf_creator</span><span class="o">.</span><span class="n">generate</span>
+<span class="lineno">16</span>     <span class="k">end</span>
+<span class="lineno">17</span>   <span class="k">end</span>
+<span class="lineno">18</span> <span class="k">end</span></code></pre></div>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="lineno"> 1</span> <span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">shippingeasy</span><span class="o">.</span><span class="na">javapdf</span><span class="o">;</span>
+<span class="lineno"> 2</span> 
+<span class="lineno"> 3</span> <span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="lineno"> 4</span> <span class="kn">import</span> <span class="nn">java.awt.image.BufferedImage</span><span class="o">;</span>
+<span class="lineno"> 5</span> <span class="kn">import</span> <span class="nn">javax.imageio.ImageIO</span><span class="o">;</span>
+<span class="lineno"> 6</span> 
+<span class="lineno"> 7</span> <span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.*</span><span class="o">;</span>
+<span class="lineno"> 8</span> <span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.edit.*</span><span class="o">;</span>
+<span class="lineno"> 9</span> <span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.graphics.xobject.*</span><span class="o">;</span>
+<span class="lineno">10</span> 
+<span class="lineno">11</span> <span class="kd">public</span> <span class="kd">class</span> <span class="nc">CreatePdf</span> <span class="o">{</span>
+<span class="lineno">12</span>   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">generate</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+<span class="lineno">13</span>     <span class="n">PDDocument</span> <span class="n">doc</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="lineno">14</span>     <span class="k">try</span> <span class="o">{</span>
+<span class="lineno">15</span>       <span class="n">doc</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">PDDocument</span><span class="o">();</span>
+<span class="lineno">16</span>       <span class="n">drawImage</span><span class="o">(</span><span class="n">doc</span><span class="o">);</span>
+<span class="lineno">17</span>       <span class="n">doc</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="s">&quot;dice.pdf&quot;</span><span class="o">);</span>
+<span class="lineno">18</span>     <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+<span class="lineno">19</span>       <span class="k">if</span> <span class="o">(</span><span class="n">doc</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+<span class="lineno">20</span>         <span class="n">doc</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+<span class="lineno">21</span>       <span class="o">}</span>
+<span class="lineno">22</span>     <span class="o">}</span>
+<span class="lineno">23</span>   <span class="o">}</span>
+<span class="lineno">24</span> 
+<span class="lineno">25</span>   <span class="kd">private</span> <span class="kt">void</span> <span class="nf">drawImage</span><span class="o">(</span><span class="n">PDDocument</span> <span class="n">doc</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+<span class="lineno">26</span>     <span class="n">PDPage</span> <span class="n">page</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">PDPage</span><span class="o">();</span>
+<span class="lineno">27</span>     <span class="n">doc</span><span class="o">.</span><span class="na">addPage</span><span class="o">(</span><span class="n">page</span><span class="o">);</span>
+<span class="lineno">28</span>     <span class="n">PDPageContentStream</span> <span class="n">content</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">PDPageContentStream</span><span class="o">(</span><span class="n">doc</span><span class="o">,</span> <span class="n">page</span><span class="o">);</span>
+<span class="lineno">29</span>     <span class="n">content</span><span class="o">.</span><span class="na">drawImage</span><span class="o">(</span><span class="n">xImage</span><span class="o">(</span><span class="n">doc</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+<span class="lineno">30</span>     <span class="n">content</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+<span class="lineno">31</span>   <span class="o">}</span>
+<span class="lineno">32</span> 
+<span class="lineno">33</span>   <span class="kd">private</span> <span class="n">PDXObjectImage</span> <span class="nf">xImage</span><span class="o">(</span><span class="n">PDDocument</span> <span class="n">doc</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+<span class="lineno">34</span>     <span class="n">BufferedImage</span> <span class="n">img</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="s">&quot;data/images/dice.png&quot;</span><span class="o">));</span>
+<span class="lineno">35</span>     <span class="k">return</span> <span class="k">new</span> <span class="nf">PDPixelMap</span><span class="o">(</span><span class="n">doc</span><span class="o">,</span> <span class="n">img</span><span class="o">);</span>
+<span class="lineno">36</span>   <span class="o">}</span>
+<span class="lineno">37</span> <span class="o">}</span></code></pre></div>
+
+</div>
+          </div>
+          <hr>
+          <footer>
+            <p>
+              &copy; 2015 Name Lastname
+              <span class="pull-right text-muted">
+                powered by
+                <a href="http://dbtek.github.io/jekyll-bootstrap-3" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll-Bootstrap-3</a>
+                and <a href="http://getbootstrap.com" target="_blank">Twitter Bootstrap 3.0.3</a>
+              </span>
+            </p>
+          </footer>
+        </div>
+        <div class="col-md-3">
+          <div id="profile-anchor"></div>
+          <div id="profile" class="well">
+            <img src="/assets/themes/bootstrap/img/lance-woodson.jpg"/>
+            <h2>Lance Woodson</h2>
+            <h4>Dev + Ops + Data</h4>
+            <hr/>
+            Contact
+            <a href="http://www.linkedin.com/pub/lance-woodson/23/747/503"><i class="fa fa-linkedin-square"></i></a>
+            &#160;
+            <a href="https://twitter.com/LanceWoodson"><i class="fa fa-twitter-square"></i></a>
+            &#160;
+            <a href="mailto:lance@webmaneuvers.com"><i class="fa fa-envelope"></i></a>
+            <br/>
+            View
+            &#160;
+            <a href="http://stackexchange.com/users/1804263/lance-woodson"><i class="fa fa-stack-exchange"></i></a>
+            <a href="http://jsfiddle.net/user/lwoodson/fiddles/"><i class="fa fa-jsfiddle"></i></a>
+            &#160;
+            <a href="https://github.com/lwoodson"><i class="fa fa-github"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <script src="/assets/themes/bootstrap/resources/jquery/jquery.min.js"></script>
+    <script src="/assets/themes/bootstrap/resources/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+

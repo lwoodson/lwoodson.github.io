@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Machine Learning In A Rails App</title>
+    
+    <meta name="author" content="Name Lastname">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Nunito:300,400' rel='stylesheet' type='text/css'>
+    <link href="/assets/themes/bootstrap/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/bootstrap/css/style.css" rel="stylesheet">
+  
+    <!--[if lt IE 9]>
+      <script src="/assets/themes/bootstrap/resources/respond/Respond.min.js"></script>
+    <![endif]-->
+
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+    <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="/assets/themes/bootstrap/js/site.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">DEVQUIXOTE</a>
+        </div>
+
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3>
+                  Machine Learning In A Rails App
+              </h3>
+            </div>
+
+            <div class="panel-body"><p>At <a href="http://shippingeasy.com/">ShippingEasy</a>, we take customer’s orders from various online storefronts and allow
+the customer to easily generate shipping labels to fulfill those orders at a reduced
+cost.  To make life even easier on our customers, we wanted to automate the process
+of decision making when purchasing a label.  After all, we had a large example set
+of data for them – the orders we’ve received and the various shipping choices
+that were made from them.  Given that data, couldn’t we use machine learning to
+infer what actions a customer would taken when confronted with an order in our
+UI?</p>
+
+<iframe width="560" height="420" src="http://www.youtube.com/embed/b49OJZlMEgo?color=white&amp;theme=light"></iframe>
+
+<p>The answer was yes.  We developed a system dubbed AutoShip that allows us to predict
+customer’s shipping choices with great accuracy.  Getting there was not so easy,
+however.  Our application is written in Ruby on Rails.  While our team is
+full of great software engineers and web development gurus, none of us were
+data scientists by trade.  Here are 3 lessons learned learned or relearned on the
+journey to bringing machine learning to our product.</p>
+
+<h3 id="build-on-the-shoulders-of-giants">1. Build on the Shoulders of Giants</h3>
+<p>Ever hear that truism?  Well, it was hammered home on this project.  I love <a href="https://www.ruby-lang.org/en/">Ruby</a> as
+a language and feel <a href="http://rubyonrails.org/">Rails</a> is a pretty good framework for building web applications.
+But its not exactly a paragon for scientific or statistical computing.  Looking
+for a machine learning lib in Ruby?  Good luck.  There are languages where machine
+learning libraries are much more mature and active.  R, Python, Scala are examples
+of languages with machine learning libraries that far outclass anything Ruby has to
+offer.  So we spiked a proof of concept using <a href="https://www.python.org/">Python</a> and <a href="http://scikit-learn.org/stable/">SciKit Learn</a> which got us off the
+ground and moving towards a final solution.</p>
+
+<p>The moral here is you really should use the best tool for the job.  We could have
+tried to fake-it-till-we-made-it as data scientists, or we could use the tools
+written by those who <em>are</em>.</p>
+
+<h3 id="play-to-your-strengths">2. Play To Your Strengths</h3>
+<p>We had spiked a workable solution, now we needed to bring it to the product.  Should
+we port to Ruby?  Should I stick with Python, the one that had brought us this far?
+We decided on the latter, implementing it as a small microservice web application
+using <a href="http://flask.pocoo.org/">Flask</a>.</p>
+
+<p>Services, even if you attach a micro prefix to them, bring a complexity to all
+environments – development, test/ci, production.  To help simplify this, I packaged
+the microservice application in a <a href="https://www.docker.com/">Docker</a> <a href="http://en.wikipedia.org/wiki/LXC">container</a>.  Thus it could be run in
+development without RoR developers having to set up a Python environment.  In
+production, we deploy the containerized application behind an <a href="http://www.haproxy.org/">Haproxy</a> load balancer,
+with <a href="https://www.serfdom.io/">Serf</a> managing the cluster of microservice containers to automagically add
+themselves to the load balancer.  This enables us to have a scalable infrastructure
+that can grow easily as our needs increase.  I plan to elaborate on this further
+in a future post.</p>
+
+<p>The upshot of all this is that implementing the feature as a microservice written
+in Python was much easier, at least for me, than trying to rewrite the excellent
+machine learning algorithms found in SciKit Learn in Ruby.  I am a systems engineer
+with devops skills, and coming up with a robust and scalable microservice
+infrastructure was more easily accomplished than suddenly reinventing myself as a
+data science uber geek.</p>
+
+<h3 id="polyglot-persistence--yes-its-a-thing">3. Polyglot Persistence.  Yes, its a thing.</h3>
+<p>We use <a href="http://www.postgresql.org/">Postgres</a> as our main database.  All of our order and shipment data lived
+there.  At first glance, it would seem like we should just use the data as found
+in the relational database to back the system.  But for a number of reasons,
+We decided to use <a href="https://www.elastic.co/">Elasticsearch</a> as the repository for the data that our system
+would use.</p>
+
+<p>First, it stores unstructured documents.  We weren’t exactly sure what data we
+would need, or how it might evolve over time.  We could shove literally anything
+into it and get it back out again without having to migrate a schema.  This
+was a very nice boon to have when being exploratory with the data to try and
+determine exactly what might yield the results we were after.</p>
+
+<p>Second, its fast and scalable.  If we denormalized an order, shipment and prediction
+data into the same document, we would not have to do any complex joins while trying to
+get large sets of order/shipment/prediction data used to train a machine learning
+algorithm.  And being elastically scalable would mean Elasicsearch could grow
+as much as we needed it to.</p>
+
+<p>Lastly, it has <a href="https://www.elastic.co/products/kibana">Kibana</a>, an amazing data visualiztaion tool.  I had already set up
+an Elasticsearch/Logstash/Kibana stack as outlined in a <a href="http://devquixote.com/devops/2014/10/20/scaling-logstash/">previous post</a>.  Pointing
+it at our order, shipment and prediction data has allowed us to have a tremendous
+ability to delve into our data.  Without writing any code, we could easily visualize
+the answers to questions like “For customer A, what were the packaging choices that
+were made for the innacurate predictions made by our service?”  It was invaluable
+during the exploratory phase, and is perhaps even more so as the feature is moving
+into support-mode post-rollout.</p>
+
+<h3 id="at-the-end-of-the-day">At the end of the day…</h3>
+<p>While we had some stumbles along the way, we were able to achieve our goals of
+providing &gt; 95% accuracy on predicting shipments for a customers orders.  In doing
+so, <a href="http://finance.yahoo.com/news/shippingeasy-introduces-industrys-first-smart-130000411.html">we are providing a great service for our customers that makes their jobs
+much easier</a>.  As for myself, I got to learn quite a bit about machine learning
+and using Linux containers in a production environment.  It was challenging, but
+a tremendous amount of fun.  Thanks, for the opportunity, ShippingEasy!</p>
+</div>
+          </div>
+          <hr>
+          <footer>
+            <p>
+              &copy; 2015 Name Lastname
+              <span class="pull-right text-muted">
+                powered by
+                <a href="http://dbtek.github.io/jekyll-bootstrap-3" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll-Bootstrap-3</a>
+                and <a href="http://getbootstrap.com" target="_blank">Twitter Bootstrap 3.0.3</a>
+              </span>
+            </p>
+          </footer>
+        </div>
+        <div class="col-md-3">
+          <div id="profile-anchor"></div>
+          <div id="profile" class="well">
+            <img src="/assets/themes/bootstrap/img/lance-woodson.jpg"/>
+            <h2>Lance Woodson</h2>
+            <h4>Dev + Ops + Data</h4>
+            <hr/>
+            Contact
+            <a href="http://www.linkedin.com/pub/lance-woodson/23/747/503"><i class="fa fa-linkedin-square"></i></a>
+            &#160;
+            <a href="https://twitter.com/LanceWoodson"><i class="fa fa-twitter-square"></i></a>
+            &#160;
+            <a href="mailto:lance@webmaneuvers.com"><i class="fa fa-envelope"></i></a>
+            <br/>
+            View
+            &#160;
+            <a href="http://stackexchange.com/users/1804263/lance-woodson"><i class="fa fa-stack-exchange"></i></a>
+            <a href="http://jsfiddle.net/user/lwoodson/fiddles/"><i class="fa fa-jsfiddle"></i></a>
+            &#160;
+            <a href="https://github.com/lwoodson"><i class="fa fa-github"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <script src="/assets/themes/bootstrap/resources/jquery/jquery.min.js"></script>
+    <script src="/assets/themes/bootstrap/resources/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+
