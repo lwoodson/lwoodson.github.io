@@ -82,7 +82,8 @@ nothing.  This is a description of one portion of an algorithm that may be fed
 arbitrary data to produce statistically relevant results.  It has been implemented
 by someone smarter than you
 [in an open source library](http://scikit-learn.org/stable/) or possibly [a service
-offering](https://aws.amazon.com/de/blogs/aws/amazon-machine-learning-make-data-driven-decisions-at-scale/).
+offering](https://aws.amazon.com/de/blogs/aws/amazon-machine-learning-make-data-driven-decisions-at-scale/)
+that have been well exercised by a large audience.
 You could implement it perfectly, and it could produce great results or really
 bad results.  It all depends on the relevancy of the data you feed to it, which brings
 me to my last point.
@@ -141,7 +142,7 @@ Employing machine learning to solve domain problems can provide huge value
 to a company or the public at large.  Learning machine learning and how to
 properly apply it to a domain, however, can be challenging.  You will need
 to develop a knowledge of the fundamentals of machine learning, but do not
-need to be a compsci, math or statistics guru to employ it.  Leverage
+need to be a computer science, math or statistics guru to employ it.  Leverage
 existing libs or services, and then focus your efforts on finding the meaningful
 data within the domain, both obvious and obscure, that will allow satisfactory
 results to  be achieved.
