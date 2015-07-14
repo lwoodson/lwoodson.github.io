@@ -150,7 +150,7 @@ Here is where [Docker](https://www.digitalocean.com/community/tutorials/how-to-i
 and [Linux containers (LXC)](https://en.wikipedia.org/wiki/LXC) came into the mix.  If you are not
 familiar with these technologies, you might want to read those links for context.
 An oversimplified description of Docker is that it is a way to
-bundle applications with their Linux runtime environment into a **container**-- the packages,
+bundle applications with their Linux runtime environment into a *container* -- the packages,
 software, libraries and resources needed for the application to do its job.
 These applications run within their own process/user/filesystem sandbox on a host
 machine and with their own network interface.  Containers are similar to a virtual
@@ -205,7 +205,7 @@ elasticsearch:
 
 # Microservice app
 predictor:
-  image: shippingeasy/autoship_predictor:1.1.2
+  image: se/autoship:1.0.0
 links:
   - redis
   - elasticsearch
@@ -265,7 +265,7 @@ microservice infrastructure in production looks like this:
 
 <img src="{{ site.url }}/assets/images/autoship_infrastructure.png"/>
 
-* On predictor01, our primary host, we run an Haproxy load balancer container.
+* On the gateway host, we run an Haproxy load balancer container.
 It is exposed to our internal network segment via port 80.  This is the
 predictor endpoint that our main application communicates to.  Haproxy will
 receive the requests and then round-robin them to any application containers
@@ -294,7 +294,7 @@ deploying a new version of the container serially a host at a time.
 <img style="float: right; padding-left: 20px" src="{{ site.url }}/assets/images/spinal_tap_meme.jpg"/>
 This gives us a modestly elastic ability to scale the predictor application
 independently of our primary application.  The primary application only ever
-communicates via HTTP to predictor01 on port 80 (the haproxy loadbalancer).
+communicates via HTTP to the gateway host on port 80 (the haproxy loadbalancer).
 Behind that, we can bring new hosts up and down to scale as needed and they are
 brought into and removed from rotation via Serf’s magic.
 
