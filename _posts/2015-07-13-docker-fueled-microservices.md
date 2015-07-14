@@ -3,6 +3,8 @@ layout: post
 category: devops
 tagline: 'Docker Fueled Microservices'
 tags: [devops, engineering]
+description: Decisions, hurdles and thoughts after delivering a Microservice deployed with Docker
+thumbnail: /assets/images/chet-600x600.jpg
 ---
 When [bringing machine learning to ShippingEasy](http://devquixote.com/data/2015/04/18/practical-machine-learning-for-the-uninitiated/)
 last year, decisions were
