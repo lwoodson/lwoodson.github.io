@@ -4,13 +4,12 @@ category: devops
 tagline: 'Docker Fueled Microservices'
 tags: [devops, engineering]
 ---
-Last fall, when tasked with bringing machine learning to ShippingEasy to make
-predictions in the e-commerce fulfillment domain, a decision was made to
-implement the predictive aspects in Python, to make it a microservice, and to
-deploy it in all environments (dev, test, staging, production) using Docker
-containers.   This post will detail the thinking behind these decisions,
-hurdles, and some thoughts on microservices and linux containers in general in
-light of the experience.
+When [bringing machine learning to ShippingEasy](http://devquixote.com/data/2015/04/18/practical-machine-learning-for-the-uninitiated/)
+last year, decisions were
+made to implement the predictive aspects in Python, to make it a microservice,
+and to deploy it in all environments using Docker containers.  This post details
+the thinking behind these decisions, hurdles, and some thoughts on microservices
+and Linux containers in light of the experience.
 
 ### The Problem and its Solution
 <img style="float: left; padding-right: 20px" src="{{ site.url }}/assets/images/chappelle_meme.jpg"/>
@@ -22,11 +21,11 @@ tool for bootstrapping a product and getting to market.  But neither are tools
 for scientific computing.  Hardly anything exists in the machine learning realm,
 and what does is not mature with a large community of experts behind it.
 
-Python, however, is known for its scientific and statistics libraries and
-communities.  It has a great machine learning library in SciKit learn.  These
-tools proved themselves through investigation into our problem, providing good
-results in a proof-of-concept.  They were the right tools for the job and gave
-us a solution to our domain problem.
+The opposite is true of Python, however.  It is widely used for scientific
+computing and has a great machine learning library in SciKit learn.  It proved
+itself through investigation into our problem, providing good results in a
+proof-of-concept.  Python and SciKit Learn were the right tools for the job and
+gave us a solution to our domain problem.
 
 ### The Problem with the Solution
 <img style="float: right; padding-left: 20px" src="{{ site.url }}/assets/images/pythonista.jpg"/>
@@ -51,10 +50,12 @@ able to support it operationally and as a product.
 
 ### Enter Microservices
 <img style="float: left; padding-right: 20px" src="{{ site.url }}/assets/images/burgundy_meme.jpg"/>
-Martin Fowler and others at ThoughtWorks have organized their observations of
-how large tech organizations manage disparate teams working with different
-technologies to be at least the sum of their parts.  They call their thoughts
-Microservices.  I wish they had chosen a different name, simply because
+[Martin Fowler](https://twitter.com/martinfowler?lang=en) and others at
+[ThoughtWorks](https://twitter.com/thoughtworks?lang=en) have organized their
+observations of how large tech organizations manage disparate teams working with
+different technologies to be at least the sum of their parts.  They call their thoughts
+[Microservices](http://martinfowler.com/articles/microservices.html).  I wish
+they had chosen a different name, simply because
 “service” is such an overloaded term, and most of the time I hear someone
 discussing microservices, I think they misunderstand what it means, at least how
 Martin Fowler would define it.  Or perhaps I am the one that misunderstands!
@@ -79,7 +80,7 @@ burdened with how things worked internally within the prediction app.  Everyone
 else could remain blissfully ignorant.
 
 To me, the case for a microservice architecture emerged from the depths of our
-problem.  There was no way we were going to remain solely a RoR application if
+problem.  There was no way we were going to remain solely a Rails application if
 we were going to deliver this feature.  The appropriate tools to solve the
 business problem dictated the architecture, not the other way around.  And it
 clearly has been proven to be the right decision.
@@ -97,11 +98,11 @@ us fetching the order from a store integration (pull).  The order is persisted
 in our primary database and a prediction is requested from a PredictionService
 within the main application.
 * The PredictionService asks a PredictionProxy for a prediction to the order.
-* The proxy is what actually talks to the python microservice application.  It
+* The proxy is what actually talks to the Python microservice application.  It
 takes the order, marshalls it to JSON, makes the web request of the
-microservice, unmarshalls it and hands it back to the service.
-* The service takes the prediction, validates the data, builds a Prediction
-object in the main application and persists it associated with the order.
+microservice, unmarshalls the response and hands it back to the service.
+* The PredictionService takes the prediction, validates the data, builds a
+Prediction object in the main application and persists it associated with the order.
 * Within our main application interface, customers can see which orders can be
 shipped using our validated predictions.  They then send the orders to an
 intermediary screen for review of the predicted choices of carrier, service,
@@ -130,7 +131,7 @@ tools for the job and to clearly separate the concerns of our app proper and the
 prediction component.  In development environments, we can use a fake Prediction
 Proxy within our app to return canned responses to prediction requests.  For
 developers, at least, our app can still run as it always has -- as a single
-process RoR application.
+process Rails application.
 
 ### More Hurdles
 <img style="float: right; padding-left: 20px" src="{{ site.url }}/assets/images/anchorman.jpg"/>
@@ -145,15 +146,16 @@ reproduce production issues and validate their fixes.
 
 ### Enter Docker
 <img style="float: left; padding-right: 20px" src="{{ site.url }}/assets/images/chet_meme.jpg"/>
-Here is where Docker and Linux containers came into the mix.  If you are not
-familiar with these technologies, you might want to read more here for context.
-To keep things brief, an oversimplified description is that they are a way to
-bundle applications with their Linux runtime environment -- the packages,
+Here is where [Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-getting-started)
+and [Linux containers (LXC)](https://en.wikipedia.org/wiki/LXC) came into the mix.  If you are not
+familiar with these technologies, you might want to read those links for context.
+An oversimplified description of Docker is that it is a way to
+bundle applications with their Linux runtime environment into a **container**-- the packages,
 software, libraries and resources needed for the application to do its job.
-They run within their own process/user/filesystem sandbox on a host machine and
-with their own network interface.  They are similar to a virtual machine, but
-much lighter as it shares the host’s kernel.  Containers can be built from other
-containers to cut down on the amount of repeated boilerplate.  Docker Hub makes
+These applications run within their own process/user/filesystem sandbox on a host
+machine and with their own network interface.  Containers are similar to a virtual
+machine, but much lighter as it shares the host’s kernel.  Containers can be built from other
+containers to cut down on the amount of repeated provisioning tasks.  Docker Hub makes
 it easy to push/pull containers and otherwise transport them around your
 environments and hosting services.
 
@@ -185,10 +187,10 @@ the operational overhead of embracing a polyglot approach to programming or
 persistence which is a cornerstone of the microservice philosophy.
 
 ### Docker in Development
-Docker-compose is used in development to manage dependencies for the main app.
-This includes all middleware and the prediction application.  Our
-docker-compose.yml file looks something like this (omitting things like ports,
-volumes, environment vars, etc…).
+[Docker-compose](https://docs.docker.com/compose/) is used in development to
+manage dependencies for the main app.  This includes all middleware and the
+prediction application.  Our docker-compose.yml file looks something like this
+(omitting things like ports, volumes, environment vars, etc…).
 
 {% highlight ruby linenos %}
 # Persistence & middleware
@@ -222,8 +224,8 @@ us to easily switch versions in our dev environments and to stay in sync with
 what is running in production.  If you come from the Ruby/Python world, Docker
 acts like RVM/VirtualEnv but for all of the infrastructure dependencies of your
 application.  Docker thus also brings one closer to the realization of a
-12-factor app and lessens the time it takes to get a dev environment up and
-running.
+[12-factor app](http://12factor.net/) and lessens the time it takes to get a dev
+environment up and running.
 
 ### Docker in Production
 <img style="float: left; padding-right: 20px" src="{{ site.url }}/assets/images/mordor_meme.jpg"/>
@@ -231,21 +233,33 @@ Realizing the benefits of Docker in a production environment where you would
 need to span multiple hosts is not as easy as development (me add
 docker-compose.yml file to project, me smart).  There are many cloud and
 self-managed options for this in various stages of development and readiness,
-including Amazon Container Service, Google Container Engine, Kubernetes,
-CoreOS/Fleet/Etcd, Docker Swarm, Deis, Flynn, Tapestry, Registrator and probably
+including [Amazon Container Service](http://aws.amazon.com/ecs/),
+[Google Container Engine](https://cloud.google.com/container-engine/),
+[Kubernetes](http://kubernetes.io/),
+[CoreOS/Fleet/Etcd](https://coreos.com/),
+[Docker Swarm](https://docs.docker.com/swarm/),
+[Deis](http://deis.io/),
+[Flynn](https://flynn.io/),
+[Registrator](https://github.com/gliderlabs/registrator),
+[Weave](http://weave.works/) and probably
 others that have leaked out of my head since I last looked.
 
 Unfortunately, at the time we decided to take all of this on, none of the above
-efforts were ready for production use.  Everything was at a version less than
-1.0.  Some still are.  If we were going to use Docker in production, we were
-going to have to do some significant work ourselves.
+efforts were ready for production use or would be serious investments when we
+had no trust yet in Docker as a technology that we wanted to commit to.  If we
+were going to use Docker in production, we were going to have to do some
+significant work ourselves.
 
-We opted for a relatively simple solution, not wanting to invest too much into
-how we hosted docker containers as we wanted to revisit later when some of the
-major projects listed above had matured.  We let Haproxy’s load balancing and
-health checks to do the heavy lifting for us.  We use Serf from Hashicorp (a
-fine tool in its own right) to manage hosts entering and leaving the cluster.
-Hosts are provisioned with Chef and do little other than install docker, ensure
+We opted for a relatively simple solution influenced by [this blog post from
+CenturyLinkLabs](http://www.centurylinklabs.com/decentralizing-docker-how-to-use-serf-with-docker/).
+This was good for us in our scenario as we were not wanting to invest too much into
+how we hosted Docker containers. Wwe wanted to first see if it lived up to
+the hype and if so, revisit hosting later when some of the
+major projects previously mentioned had matured.  We let [Haproxy’s load balancing and
+health checks](http://www.haproxy.org/) to do the heavy lifting for us.  We use
+[Serf from Hashicorp](https://www.serfdom.io/) (a fine tool in its own right) to
+manage hosts entering and leaving the cluster.
+Hosts are [provisioned with Chef](https://www.chef.io/) and do little other than install Docker, ensure
 host networking is set up correctly, and setup SSHD.   The topology of our
 microservice infrastructure in production looks like this:
 
