@@ -9,22 +9,23 @@ thumbnail: /assets/images/burgundy_meme.jpg
 When [bringing machine learning to ShippingEasy](http://devquixote.com/data/2015/04/18/practical-machine-learning-for-the-uninitiated/)
 last year, decisions were
 made to implement the predictive aspects in Python, to make it a microservice,
-and to deploy it in all environments using Docker containers.  This is the first
+and to package and deploy it in all environments as a Docker container.  This is the first
 of [two posts](/devops/2015/07/15/docker-fueled-microservices-part-2/) detailing the the thinking behind these decisions, hurdles, and
 some thoughts on microservices and Linux containers in light of the experience.
 
 ### The Problem and its Solution
 <img style="float: left; padding-right: 20px" src="{{ site.url }}/assets/images/chappelle_meme.jpg"/>
-I’ve detailed the problem elsewhere, so I won’t spend too much time expanding on
+[I’ve detailed the problem elsewhere](http://devquixote.com/data/2015/04/18/practical-machine-learning-for-the-uninitiated/),
+so I won’t spend too much time expanding on
 it here.  We needed to use machine learning algorithms to predict how our
-customers would ship their orders given a historical set of their orders and how
+customers would ship new orders given a set of their past orders and how
 they were shipped.  Ruby is an amazing, elegant language and Rails is an great
 tool for bootstrapping a product and getting to market.  But neither are tools
 for scientific computing.  Hardly anything exists in the machine learning realm,
 and what does is not mature with a large community of experts behind it.
 
 The opposite is true of Python, however.  It is widely used for scientific
-computing and has a great machine learning library in SciKit learn.  It proved
+computing and has a great machine learning library in SciKit Learn.  It proved
 itself through investigation into our problem, providing good results in a
 proof-of-concept.  Python and SciKit Learn were the right tools for the job and
 gave us a solution to our domain problem.
@@ -32,8 +33,8 @@ gave us a solution to our domain problem.
 ### The Problem with the Solution
 <img style="float: right; padding-left: 20px" src="{{ site.url }}/assets/images/pythonista.jpg"/>
 As a lean start-up development organization, we are heavily coupled to
-Ruby/Rails.  Our application is generally a monolithic Ruby on Rails app.  We
-use Resque for background processing, and have some integrations split into
+Ruby/Rails.  Our application is generally [a monolithic Ruby on Rails app](https://en.wikipedia.org/wiki/Monolithic_application).
+We use Resque for background processing, and have some integrations split into
 engines, but by and large we are a monolith.  The same Ruby/Rails code is
 deployed to web servers as is deployed to worker servers.
 
@@ -62,7 +63,7 @@ they had chosen a different name, simply because
 discussing microservices, I think they misunderstand what it means, at least how
 Martin Fowler would define it.  Or perhaps I am the one that misunderstands!
 
-At any rate, everything here seemed to fit the case for a microservice. There
+At any rate, our problems seemed to fit the case for a microservice. There
 was a natural dividing line around the business capability of predicting
 shipments and the rest of our app.  That dividing line had an easy interface to
 design -- given an order, predict a shipment.  This functionality needed to be
@@ -96,7 +97,7 @@ gross architecture looks like this...
 <img src="{{ site.url }}/assets/images/autoship_arch1.png"/>
 
 * Orders flow into our system, either from a direct API call to us (push) or by
-us fetching the order from a store integration (pull).  The order is persisted
+us fetching the order from a store API (pull).  The order is persisted
 in our primary database and a prediction is requested from a PredictionService
 within the main application.
 * The PredictionService asks a PredictionProxy for a prediction to the order.
